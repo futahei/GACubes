@@ -23,7 +23,7 @@ public class Main : MonoBehaviour
   {
     // ルールの設定
     selectRule = new EliteSelectRule<Vector2>();
-    crossOverRule = new TwoPointCrossOverRule<Vector2>();
+    crossOverRule = new SinglePointCrossOverRule<Vector2>();
     mutationRule = new VectorMutationRuls();
 
     // ゲノム生成
@@ -57,14 +57,15 @@ public class Main : MonoBehaviour
       // 終了
       if (Age >= MAX_AGE) break;
 
+      // ゲノムのスコアリング
+      for(int i = 0; i < genoms.Length; i++)
+      {
+        var vg = genoms[i].OutputDna();
+        genoms[i].Score = Mathf.Sqrt(Mathf.Pow(TARGET_POINT.position.x - vg.x, 2) + Mathf.Pow(TARGET_POINT.position.z - vg.y, 2));
+      }
+
       // 優秀順に並べ替え
-      Array.Sort(genoms, (a, b) => {
-        Vector2 va = a.OutputDna();
-        Vector2 vb = b.OutputDna();
-        var da = Math.Sqrt(Math.Pow(TARGET_POINT.position.x - va.x, 2) + Math.Pow(TARGET_POINT.position.z - va.y, 2));
-        var db = Math.Sqrt(Math.Pow(TARGET_POINT.position.x - vb.x, 2) + Math.Pow(TARGET_POINT.position.z - vb.y, 2));
-        return da > db ? 1 : da == db ? 0 : -1;
-      });
+      Array.Sort(genoms, (a, b) => a.Score > b.Score ? 1 : a.Score == b.Score ? 0 : -1);
 
       // 選択
       var selected = selectRule.Select(genoms, MAX_GENOM_COUNT / 5);
@@ -90,7 +91,7 @@ public class Main : MonoBehaviour
       // 突然変異
       for(int i = 0; i < genoms.Length; i++)
       {
-        if (UnityEngine.Random.value < 0.001)
+        if (UnityEngine.Random.value < 0.1)
         {
           mutationRule.Mutate(genoms[i]);
         }

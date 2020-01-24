@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 public abstract class Genom<T> : IGenom where T : struct
 {
+  public float Score;
   public int Length;
   public T[] Dna;
 
