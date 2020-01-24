@@ -23,7 +23,7 @@ public class Main : MonoBehaviour
   {
     // ルールの設定
     selectRule = new EliteSelectRule<Vector2>();
-    crossOverRule = new SinglePointCrossOverRule<Vector2>();
+    crossOverRule = new TwoPointCrossOverRule<Vector2>();
     mutationRule = new VectorMutationRuls();
 
     // ゲノム生成
