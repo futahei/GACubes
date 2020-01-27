@@ -18,19 +18,27 @@ public class Main : MonoBehaviour
   [SerializeField, Tooltip("遺伝子長")]
   private int GENOM_LENGTH = 10;
 
-  private int Age = 1;
+  [SerializeField, Tooltip("選択ルール"), Header("世代更新設定")]
+  private SelectRuleMode s_rule = SelectRuleMode.Elite;
+  [SerializeField, Tooltip("交叉ルール")]
+  private CrossOverRuleMode c_rule = CrossOverRuleMode.Single;
+  [SerializeField, Tooltip("突然変異発生確率(%)"), Range(0, 100)]
+  private float m_rate = 1.0f;
+
+  private int age = 1;
+  private GameObject[] cubes;
+
   private ISelectRule<Vector2> selectRule;
   private ICrossOverRule<Vector2> crossOverRule;
   private IMutationRule<Vector2> mutationRule;
 
-  private GameObject[] cubes;
+  private enum SelectRuleMode { Elite, Roulette }
+  private enum CrossOverRuleMode { Single, Two }
 
   IEnumerator Start()
   {
     // ルールの設定
-    selectRule = new EliteSelectRule<Vector2>();
-    crossOverRule = new SinglePointCrossOverRule<Vector2>();
-    mutationRule = new VectorMutationRuls();
+    SetupRules();
 
     // ゲノム生成
     var genoms = new VectorGenom[MAX_GENOM_COUNT];
@@ -50,18 +58,14 @@ public class Main : MonoBehaviour
 
     while(true)
     {
-      Debug.Log(Age);
-      // if (Age % 25 == 0 || Age == 1)
+      for(int i = 0; i < cubes.Length; i++)
       {
-        for(int i = 0; i < cubes.Length; i++)
-        {
-          var v = genoms[i].OutputDna();
-          cubes[i].transform.position = new Vector3(v.x, 0, v.y);
-        }
+        var v = genoms[i].OutputDna();
+        cubes[i].transform.position = new Vector3(v.x, 0, v.y);
       }
 
       // 終了
-      if (Age >= MAX_AGE) break;
+      if (age >= MAX_AGE) break;
 
       // ゲノムのスコアリング
       for(int i = 0; i < genoms.Length; i++)
@@ -97,15 +101,35 @@ public class Main : MonoBehaviour
       // 突然変異
       for(int i = 0; i < genoms.Length; i++)
       {
-        if (UnityEngine.Random.value < 0.1)
+        if (UnityEngine.Random.value < m_rate)
         {
           mutationRule.Mutate(genoms[i]);
         }
       }
 
-      Age++;
+      age++;
 
       yield return pase;
     }
+  }
+
+  void SetupRules()
+  {
+    switch(s_rule)
+    {
+      case SelectRuleMode.Elite: selectRule = new EliteSelectRule<Vector2>(); break;
+      case SelectRuleMode.Roulette: selectRule = new RouletteSelectRule<Vector2>(); break;
+      default: selectRule = new EliteSelectRule<Vector2>(); break;
+    }
+
+    switch(c_rule)
+    {
+      case CrossOverRuleMode.Single: crossOverRule = new SinglePointCrossOverRule<Vector2>(); break;
+      case CrossOverRuleMode.Two: crossOverRule = new TwoPointCrossOverRule<Vector2>(); break;
+      default: crossOverRule = new SinglePointCrossOverRule<Vector2>(); break;
+    }
+
+    mutationRule = new VectorMutationRuls();
+    m_rate /= 100;
   }
 }
