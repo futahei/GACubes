@@ -4,20 +4,26 @@ using System;
 using System.Linq;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class Main : MonoBehaviour
 {
+  [SerializeField, Tooltip("到達対象")]
+  private Transform TARGET_POINT = null;
 
-  public GameObject[] cubes;
-
-  public Transform TARGET_POINT;
-  public readonly int MAX_AGE = 100;
-  public readonly int MAX_GENOM_COUNT = 100;
-  public readonly int GENOM_LENGTH = 10;
+  // 定数
+  [SerializeField, Tooltip("最大到達世代数"), Header("環境設定")]
+  private int MAX_AGE = 100;
+  [SerializeField, Tooltip("ゲノム数")]
+  private int MAX_GENOM_COUNT = 100;
+  [SerializeField, Tooltip("遺伝子長")]
+  private int GENOM_LENGTH = 10;
 
   private int Age = 1;
   private ISelectRule<Vector2> selectRule;
   private ICrossOverRule<Vector2> crossOverRule;
   private IMutationRule<Vector2> mutationRule;
+
+  private GameObject[] cubes;
 
   IEnumerator Start()
   {
