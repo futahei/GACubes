@@ -1,4 +1,4 @@
-# GACubes
+# Genetic Algorithm Cubes
 Cubes move based on rules by Genetic Algorithm.
 
 # How to move
